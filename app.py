@@ -1,6 +1,9 @@
 # Imports
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+import graphene
+from graphene_sqlalchemy import SQLAlchemyObjectType, SQLAlchemyConnectionField
+from flask_graphql import GraphQLView
 
 # initializing our app
 app = Flask(__name__)
@@ -8,8 +11,6 @@ app.debug = True
 
 # Configs
 # Replace the user, password, hostname and database according to your configuration information
-
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:omega123@localhost:5432/book-store-api'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True 
@@ -46,10 +47,53 @@ class Book(db.Model):
         return '<Book %r>' % self.title % self.description % self.year % self.author_id
 
 # Schema Objects
-# Our schema objects will go here
+class BookObject(SQLAlchemyObjectType):
+    class Meta:
+        model = Book
+        interfaces = (graphene.relay.Node, )
+class UserObject(SQLAlchemyObjectType):
+   class Meta:
+       model = User
+       interfaces = (graphene.relay.Node, )
+
+class Query(graphene.ObjectType):
+    node = graphene.relay.Node.Field()
+    all_books = SQLAlchemyConnectionField(BookObject)
+    all_users = SQLAlchemyConnectionField(UserObject)
+
+schema = graphene.Schema(query=Query)
+
+class AddBook(graphene.Mutation):
+    class Arguments:
+        title = graphene.String(required=True)
+        description = graphene.String(required=True) 
+        year = graphene.Int(required=True) 
+        username = graphene.String(required=True)
+    book = graphene.Field(lambda: BookObject)
+
+    def mutate(self, info, title, description, year, username):
+        user = User.query.filter_by(username=username).first()
+        book = Book(title=title, description=description, year=year)
+        if user is not None:
+            book.author = user
+        db.session.add(book)
+        db.session.commit()
+        return AddBook(book=book)
+
+class Mutation(graphene.ObjectType):
+    add_book = AddBook.Field()
+schema = graphene.Schema(query=Query, mutation=Mutation)
+
 
 # Routes
-# Our GraphQL route will go here
+app.add_url_rule(
+    '/graphql-api',
+    view_func=GraphQLView.as_view(
+        'graphql',
+        schema=schema,
+        graphiql=True # for having the GraphiQL interface
+    )
+)
 
 @app.route('/')
 def index():
