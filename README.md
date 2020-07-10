@@ -26,7 +26,7 @@
 
 ### >>> from app import db, User, Book
 
-### >>> postgres = User(username='postgres', email='shruti1.malik.ramaswamy@gmail.com')
+### >>> postgres = User(username='postgresuser', email='shruti1.malik.ramaswamy@gmail.com')
 
 ### >>> db.session.add(postgres)
 
@@ -40,7 +40,7 @@
 
 ### >>> flaskbook.year = 2020
 
-### >>> flaskbook.author_id = postgres.id
+### >>> flaskbook.author_id = postgresisscary.id
 
 ### >>> db.session.add(flaskbook)
 
