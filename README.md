@@ -18,7 +18,7 @@
 
 ### the database name is book-store-api
 
-### 'postgresql://postgres:omega123@localhost:5432/book-store-api'
+### 'postgresql://postgres:password@localhost:5432/book-store-api'
 
 ### pip install flask flask-graphql flask-migrate sqlalchemy graphene graphene-sqlalchemy psycopg2-binary
 
@@ -26,7 +26,7 @@
 
 ### >>> from app import db, User, Book
 
-### >>> postgres = User(username='postgresuser', email='shruti1.malik.ramaswamy@gmail.com')
+### >>> postgres = User(username='postgresuser', email='email@gmail.com')
 
 ### >>> db.session.add(postgres)
 
